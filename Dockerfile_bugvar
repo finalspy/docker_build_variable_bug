@@ -1,0 +1,13 @@
+FROM python:3.6-slim-stretch
+
+RUN echo $PYTHON_VERSION
+
+RUN echo "vrai" > result1.txt; if [ ! $PYTHON_VERSION = 'default' ]; then echo "faux" > result1.txt ; fi
+
+ARG PYTHON_VERSION=default
+
+RUN echo $PYTHON_VERSION
+
+RUN echo "vrai" > result2.txt; if [ ! $PYTHON_VERSION = 'default' ]; then echo "faux" > result2.txt ; fi
+
+CMD [ "sh", "-c", "echo $PYTHON_VERSION && cat result1.txt && cat result2.txt" ]
