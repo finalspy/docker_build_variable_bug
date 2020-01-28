@@ -6,23 +6,24 @@ Not sure yet if this is the intended behavior and so if the problem come from bu
 
 ### prerequisite
 You have in your image an environment variable already set with a value.
-In your Dockerfile you define the same name for an ARG with a default value.
+In your Dockerfile you define the same name for an `ARG` with a default value.
 
 ### First thing
 **Without buildkit** the logs show the ARG/environement **variable name**.
 **With buildkit** logs shows the **variable's value** of the ARG/environment variable, not the name.
 
 ### Second one
-If in a RUN you use this variable let's say in a if statement, then the reslt will be different depending on if you use buildkit or not.
-I noticed that while building : [https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile] using --build-arg BASE_CONTAINER="python:3.6-slim-stretch" (to replace the ubuntu default image). Without buildkit it ran with no problems, but with buildkit this ended in Conda running for several hours trying to solve dependency issues. Then I noticed some logs refering to Python3.7 besides I used a base image of Python 3.6. 
-After several hours digging into this I determined that the problem came from : [https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile#L86]
+If in a `RUN` you use this variable let's say in a if statement, then the reslt will be different depending on if you use buildkit or not.
+I noticed that while building : [jupyter/docker-stacks/base-notebook](https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile) using `--build-arg BASE_CONTAINER="python:3.6-slim-stretch"` (to replace the ubuntu default image). Without buildkit it ran with no problems, but with buildkit this ended in Conda running for several hours trying to solve dependency issues. Then I noticed some logs refering to Python3.7 besides I used a base image of Python 3.6. 
+After several hours digging into this I determined that the problem came from : [line 86](https://github.com/jupyter/docker-stacks/blob/master/base-notebook/Dockerfile#L86)
 And then I setup this short project to demonstrate the behavior that caused the conda issue.
 
 
 ## Steps to reproduce
-Launch './build_nobk.sh' it should build an image **without** buildkit and run it using the file Dockerfile_bugarg.
+Launch `./build_nobk.sh` it should build an image **without** buildkit and run it using the file Dockerfile_bugarg.
 Here's a sample output :
 
+  ```
   Sending build context to Docker daemon  53.25kB
   Step 1/7 : FROM python:3.6-slim-stretch
     ---> 8f4617e3e809
@@ -58,11 +59,12 @@ Here's a sample output :
   3.6.10
   faux
   *faux*
+  ```
 
-
-Launch './build_bk.sh' it should build an image **with** buildkit and run it using the file Dockerfile_bugarg.
+Launch `./build_bk.sh` it should build an image **with** buildkit and run it using the file Dockerfile_bugarg.
 Here's a sample output :
 
+  ```
   [+] Building 2.0s (9/9) FINISHED                                  
   => [internal] load .dockerignore                            0.0s
   => => transferring context: 2B                              0.0s
@@ -82,6 +84,7 @@ Here's a sample output :
   3.6.10
   faux
   **vrai**
-
+  ```
+  
 ## Conclusion
 Need to determine if this behavior is intended or not, and anyway be carefull choosing names for ARG in Dockerfile.
